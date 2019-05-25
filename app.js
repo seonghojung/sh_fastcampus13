@@ -26,7 +26,8 @@ db.sequelize
   });
 
 const admin = require("./routes/admin");
-const accounts = require(".//routes/accounts");
+const accounts = require("./routes/accounts");
+const contacts = require("./routes/contacts");
 
 const app = express();
 const port = 3000;
@@ -52,6 +53,7 @@ app.get("/", (req, res) => {
 
 app.use("/admin", admin);
 app.use("/accounts", accounts);
+app.use("/contacts", contacts);
 
 app.listen(port, () => {
   console.log("Express listening on port", port);
