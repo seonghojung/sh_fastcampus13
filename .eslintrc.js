@@ -25,6 +25,7 @@ module.exports = {
     "guard-for-in": "off",
     "no-restricted-syntax": "off",
     "prefer-destructuring": "off",
-    "no-loop-func": "off"
+    "no-loop-func": "off",
+    "no-param-reassign": "off"
   }
 };

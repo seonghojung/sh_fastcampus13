@@ -1,7 +1,51 @@
 const express = require("express");
+const passport = require("passport");
+const LocalStrategy = require("passport-local").Strategy;
 const models = require("../models");
+const passwordHash = require("../helpers/passwordHash");
 
 const router = express.Router();
+
+passport.serializeUser((user, done) => {
+  console.log("serializeUser");
+  done(null, user);
+});
+
+passport.deserializeUser((user, done) => {
+  const result = user;
+  result.password = "";
+  console.log("deserializeUser");
+  done(null, result);
+});
+
+passport.use(
+  new LocalStrategy(
+    {
+      usernameField: "username",
+      passwordField: "password",
+      passReqToCallback: true
+    },
+    async (req, username, password, done) => {
+      // 조회
+      const user = await models.User.findOne({
+        where: {
+          username,
+          password: passwordHash(password)
+        }
+        // attributes: { exclude: ['password'] }
+      });
+
+      // 유저에서 조회되지 않을시
+      if (!user) {
+        return done(null, false, { message: "일치하는 아이디 패스워드가 존재하지 않습니다." });
+
+        // 유저에서 조회 되면 세션등록쪽으로 데이터를 넘김
+      } else {
+        return done(null, user.dataValues);
+      }
+    }
+  )
+);
 
 router.get("/", (_, res) => {
   res.send("account app");
@@ -34,8 +78,24 @@ router.post("/join", async (req, res) => {
   }
 });
 
-router.get("/login", (_, res) => {
-  res.render("accounts/login.html");
+router.get("/login", (req, res) => {
+  res.render("accounts/login.html", { flashMessage: req.flash().error });
+});
+
+router.post(
+  "/login",
+  passport.authenticate("local", {
+    failureRedirect: "/accounts/login",
+    failureFlash: true
+  }),
+  (_, res) => {
+    res.send('<script>alert("로그인 성공");location.href="/";</script>');
+  }
+);
+
+router.get("/logout", (req, res) => {
+  req.logout();
+  res.redirect("/accounts/login");
 });
 
 module.exports = router;

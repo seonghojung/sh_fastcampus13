@@ -28,6 +28,19 @@ module.exports = function (sequelize, DataTypes) {
     }
   );
 
+  // 제품 모델 관계도
+  User.associate = models => {
+    // 메모 모델에 외부키를 건다
+    // onDelete 옵션의 경우 제품 하나가 삭제되면 외부키가 걸린 메모들도 싹다 삭제해준다 단 sync를 다시 해줘야됨
+    // as 의 경우 모델명과 똑같이 하지 않는다 Products (x)
+    User.hasMany(models.Products, {
+      as: "Product",
+      foreignKey: "user_id",
+      sourceKey: "id",
+      onDelete: "CASCADE"
+    });
+  };
+
   User.beforeCreate((user, _) => {
     user.password = passwordHash(user.password);
   });

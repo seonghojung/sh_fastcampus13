@@ -3,7 +3,9 @@ const csrf = require("csurf");
 const path = require("path");
 const fs = require("fs");
 const multer = require("multer");
+const paginate = require("express-paginate");
 const models = require("../models");
+const loginRequired = require("../helpers/loginRequired");
 
 const router = express.Router();
 const csrfProtection = csrf({ cookie: true });
@@ -29,28 +31,55 @@ router.get("/", (req, res) => {
 });
 
 // 제품 리스트 페이지
-router.get("/products", async (_, res) => {
+router.get("/products", paginate.middleware(3, 50), async (req, res) => {
   try {
-    const products = await models.Products.findAll();
-    res.render("admin/products.html", { products });
+    const [products, totalCount] = await Promise.all([
+      models.Products.findAll({
+        include: [
+          {
+            model: models.User,
+            as: "Owner",
+            attributes: ["username", "displayname"]
+          }
+        ],
+        limit: req.query.limit,
+        offset: req.offset
+      }),
+
+      models.Products.count()
+    ]);
+
+    const pageCount = Math.ceil(totalCount / req.query.limit);
+
+    const pages = paginate.getArrayPages(req)(4, pageCount, req.query.page);
+
+    res.render("admin/products.html", { products, pages, pageCount });
   } catch (e) {
     console.log(e);
   }
 });
 
 // 제품 등록 페이지
-router.get("/products/write", csrfProtection, (req, res) => {
+router.get("/products/write", loginRequired, csrfProtection, (req, res) => {
   res.render("admin/form.html", { csrfToken: req.csrfToken() });
 });
-router.post("/products/write", upload.single("thumbnail"), csrfProtection, async (req, res) => {
-  try {
-    req.body.thumbnail = req.file ? req.file.filename : "";
-    await models.Products.create(req.body);
-    res.redirect("/admin/products");
-  } catch (e) {
-    console.log(e);
+router.post(
+  "/products/write",
+  loginRequired,
+  upload.single("thumbnail"),
+  csrfProtection,
+  async (req, res) => {
+    try {
+      req.body.thumbnail = req.file ? req.file.filename : "";
+      // 유저를 가져온다음에 저장
+      const user = await models.User.findByPk(req.user.id);
+      await user.createProduct(req.body);
+      res.redirect("/admin/products");
+    } catch (e) {
+      console.log(e);
+    }
   }
-});
+);
 
 // 제품 상세 페이지
 router.get("/products/detail/:id", async (req, res) => {
@@ -92,7 +121,7 @@ router.get("/products/delete/:product_id/:memo_id", async (req, res) => {
 });
 
 // 제품 수정 페이지
-router.get("/products/edit/:id", csrfProtection, async (req, res) => {
+router.get("/products/edit/:id", loginRequired, csrfProtection, async (req, res) => {
   try {
     const product = await models.Products.findByPk(req.params.id);
     res.render("admin/form.html", { product, csrfToken: req.csrfToken() });
@@ -100,30 +129,36 @@ router.get("/products/edit/:id", csrfProtection, async (req, res) => {
     console.log(e);
   }
 });
-router.post("/products/edit/:id", upload.single("thumbnail"), csrfProtection, async (req, res) => {
-  try {
-    // 이전에 저장되어있는 파일명을 받아오기 위함
-    const product = await models.Products.findByPk(req.params.id);
+router.post(
+  "/products/edit/:id",
+  loginRequired,
+  upload.single("thumbnail"),
+  csrfProtection,
+  async (req, res) => {
+    try {
+      // 이전에 저장되어있는 파일명을 받아오기 위함
+      const product = await models.Products.findByPk(req.params.id);
 
-    if (req.file && product.thumbnail) {
-      // 요청중에 파일이 존재 할시 이전이미지 지운다.
-      fs.unlinkSync(`${uploadDir}/${product.thumbnail}`);
+      if (req.file && product.thumbnail) {
+        // 요청중에 파일이 존재 할시 이전이미지 지운다.
+        fs.unlinkSync(`${uploadDir}/${product.thumbnail}`);
+      }
+
+      // 파일요청이면 파일명을 담고 아니면 이전 DB에서 가져온다
+      req.body.thumbnail = req.file ? req.file.filename : product.thumbnail;
+
+      await models.Products.update(req.body, {
+        where: { id: req.params.id }
+      });
+      res.redirect(`/admin/products/detail/${req.params.id}`);
+    } catch (e) {
+      console.log(e);
     }
-
-    // 파일요청이면 파일명을 담고 아니면 이전 DB에서 가져온다
-    req.body.thumbnail = req.file ? req.file.filename : product.thumbnail;
-
-    await models.Products.update(req.body, {
-      where: { id: req.params.id }
-    });
-    res.redirect(`/admin/products/detail/${req.params.id}`);
-  } catch (e) {
-    console.log(e);
   }
-});
+);
 
 // 제품 삭제 페이지
-router.get("/products/delete/:id", async (req, res) => {
+router.get("/products/delete/:id", loginRequired, async (req, res) => {
   try {
     await models.Products.destroy({
       where: {
