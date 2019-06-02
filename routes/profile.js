@@ -34,12 +34,12 @@ router.post("/edit", loginRequired, csrfProtection, async (req, res) => {
         where: { username: req.body.username }
       }
     );
-    req.login(req.user, error => {
-      if (error) {
-        console.log(error);
+    req.login(req.user, err => {
+      if (err) {
+        return next(err);
       }
+      return res.redirect("/profile");
     });
-    res.redirect("/profile");
   } catch (e) {
     console.log(e);
   }

@@ -37,7 +37,7 @@ passport.use(
 
       // 유저에서 조회되지 않을시
       if (!user) {
-        return done(null, false, { message: "일치하는 아이디 패스워드가 존재하지 않습니다." });
+        return done(null, false, { message: "일치하는 아이디, 패스워드가 존재하지 않습니다." });
 
         // 유저에서 조회 되면 세션등록쪽으로 데이터를 넘김
       } else {
