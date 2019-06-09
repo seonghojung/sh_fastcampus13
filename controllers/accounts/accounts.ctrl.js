@@ -1,10 +1,7 @@
-const express = require("express");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
-const models = require("../models");
-const passwordHash = require("../helpers/passwordHash");
-
-const router = express.Router();
+const models = require("../../models");
+const passwordHash = require("../../helpers/passwordHash");
 
 passport.serializeUser((user, done) => {
   console.log("serializeUser");
@@ -47,15 +44,11 @@ passport.use(
   )
 );
 
-router.get("/", (_, res) => {
-  res.send("account app");
-});
-
 // 회원가입 페이지
-router.get("/join", (_, res) => {
+exports.get_join = (_, res) => {
   res.render("accounts/join.html");
-});
-router.post("/join", async (req, res) => {
+};
+exports.post_join = async (req, res) => {
   try {
     const allUsers = await models.User.findAll();
     let idCheck = false;
@@ -76,26 +69,18 @@ router.post("/join", async (req, res) => {
   } catch (e) {
     console.log(e);
   }
-});
+};
 
-router.get("/login", (req, res) => {
+// 로그인 페이지
+exports.get_login = (req, res) => {
   res.render("accounts/login.html", { flashMessage: req.flash().error });
-});
+};
+exports.post_login = async (_, res) => {
+  res.send('<script>alert("로그인 성공");location.href="/";</script>');
+};
 
-router.post(
-  "/login",
-  passport.authenticate("local", {
-    failureRedirect: "/accounts/login",
-    failureFlash: true
-  }),
-  (_, res) => {
-    res.send('<script>alert("로그인 성공");location.href="/";</script>');
-  }
-);
-
-router.get("/logout", (req, res) => {
+// 로그아웃 페이지
+exports.get_logout = (req, res) => {
   req.logout();
   res.redirect("/accounts/login");
-});
-
-module.exports = router;
+};

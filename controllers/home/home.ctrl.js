@@ -1,10 +1,6 @@
-const express = require("express");
-const models = require("../models");
+const models = require("../../models");
 
-const router = express.Router();
-
-/* GET home page. */
-router.get("/", async (_, res) => {
+exports.index = async (_, res) => {
   const products = await models.Products.findAll({
     include: [
       {
@@ -14,7 +10,6 @@ router.get("/", async (_, res) => {
       }
     ]
   });
+  // console.log(models.Products.findAll())
   res.render("home.html", { products });
-});
-
-module.exports = router;
+};

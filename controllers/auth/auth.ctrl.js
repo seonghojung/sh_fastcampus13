@@ -3,9 +3,7 @@ const passport = require("passport");
 const FacebookStrategy = require("passport-facebook").Strategy;
 const KakaoStrategy = require("passport-kakao").Strategy;
 const dotenv = require("dotenv");
-const models = require("../models");
-
-const router = express.Router();
+const models = require("../../models");
 
 dotenv.config(); // LOAD CONFIG
 
@@ -70,21 +68,9 @@ passport.use(
   )
 );
 
-// http://localhost:3000/auth/facebook 접근시 facebook으로 넘길 url 작성해줌
-router.get("/facebook", passport.authenticate("facebook", { scope: "email" }));
-
-// 인증후 페이스북에서 이 주소로 리턴해줌. 상단에 적은 callbackURL과 일치
-router.get(
-  "/facebook/callback",
-  passport.authenticate("facebook", {
-    successRedirect: "/",
-    failureRedirect: "/auth/facebook/fail"
-  })
-);
-
-router.get("/facebook/fail", (req, res) => {
+exports.get_facebook_fail = (_, res) => {
   res.send("facebook login fail");
-});
+};
 
 // 카카오톡 로그인
 passport.use(
@@ -130,20 +116,6 @@ passport.use(
   )
 );
 
-// http://localhost:3000/auth/kakao 접근시 kakao으로 넘길 url 작성해줌
-router.get("/kakao", passport.authenticate("kakao"));
-
-// 인증후 카카오에서 이 주소로 리턴해줌. 상단에 적은 callbackURL과 일치
-router.get(
-  "/kakao/callback",
-  passport.authenticate("kakao", {
-    successRedirect: "/",
-    failureRedirect: "/auth/kakao/fail"
-  })
-);
-
-router.get("/kakao/fail", (req, res) => {
+exports.get_kakao_fail = (_, res) => {
   res.send("kakao login fail");
-});
-
-module.exports = router;
+};

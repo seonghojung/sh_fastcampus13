@@ -16,8 +16,9 @@
       <img src="/uploads/{{ product.thumbnail }}" style="max-width: 100%" />
     </p>
     {% endif %}
-    <p>{{ product.price }}원</p>
-    <p>{{ product.description }}</p>
+
+    {{ product.description | safe }}
+
     <hr />
     <ul>
       {% for memo in product.Memo %}

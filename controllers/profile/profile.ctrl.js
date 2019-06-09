@@ -1,18 +1,12 @@
-const express = require("express");
-const csrf = require("csurf");
-const models = require("../models");
-const loginRequired = require("../helpers/loginRequired");
-
-const router = express.Router();
-const csrfProtection = csrf({ cookie: true });
+const models = require("../../models");
 
 // 프로필 페이지
-router.get("/", loginRequired, (req, res) => {
+exports.get_profile = (_, res) => {
   res.render("profile/index.html");
-});
+};
 
 // 프로필 수정 페이지
-router.get("/edit", loginRequired, csrfProtection, async (req, res) => {
+exports.get_profile_update = async (req, res) => {
   try {
     const user = await models.User.findOne({
       where: {
@@ -23,8 +17,8 @@ router.get("/edit", loginRequired, csrfProtection, async (req, res) => {
   } catch (e) {
     console.log(e);
   }
-});
-router.post("/edit", loginRequired, csrfProtection, async (req, res) => {
+};
+exports.post_profile_update = async (req, res) => {
   try {
     await models.User.update(
       {
@@ -43,6 +37,4 @@ router.post("/edit", loginRequired, csrfProtection, async (req, res) => {
   } catch (e) {
     console.log(e);
   }
-});
-
-module.exports = router;
+};
