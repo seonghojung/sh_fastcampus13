@@ -49,7 +49,7 @@ class App {
       .authenticate()
       .then(() => {
         console.log("Connection has been established successfully.");
-        //  return db.sequelize.sync();
+        // return db.sequelize.sync()
         // return db.sequelize.drop();
       })
       .then(() => {
@@ -86,7 +86,7 @@ class App {
   setSession() {
     const SequelizeStore = require("connect-session-sequelize")(session.Store);
 
-    const sessionMiddleWare = session({
+    this.app.sessionMiddleWare = session({
       secret: "fastcampus",
       resave: false,
       saveUninitialized: true,
@@ -98,11 +98,12 @@ class App {
       })
     });
 
-    this.app.use(sessionMiddleWare);
+    this.app.use(this.app.sessionMiddleWare);
   }
 
   setStatic() {
     this.app.use("/uploads", express.static("uploads"));
+    this.app.use("/static", express.static("static"));
   }
 
   setLocals() {
