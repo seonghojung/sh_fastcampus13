@@ -138,3 +138,22 @@ exports.get_products_delete = async (req, res) => {
 exports.post_products_delete = async (req, res) => {
   res.send(`/uploads/${req.file.filename}`);
 };
+
+// 주문 리스트 페이지
+exports.get_order = async (req, res) => {
+  try {
+    const checkouts = await models.Checkout.findAll();
+    res.render("admin/order.html", { checkouts });
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+exports.get_order_edit = async (req, res) => {
+  try {
+    const checkout = await models.Checkout.findByPk(req.params.id);
+    res.render("admin/order_edit.html", { checkout });
+  } catch (e) {
+    console.log(e);
+  }
+};

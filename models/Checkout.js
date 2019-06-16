@@ -21,6 +21,12 @@ module.exports = function (sequelize, DataTypes) {
       song_jang: { type: DataTypes.STRING } // 송장번호
     },
     {
+      getterMethods: {
+        numberFormat() {
+          // 1000원을 1,000원으로 바꿔준다.
+          return new Intl.NumberFormat().format(this.paid_amount);
+        }
+      },
       tableName: "Checkout"
     }
   );

@@ -8,6 +8,7 @@ const csrfProtection = require("../../middleware/csrf");
 const loginRequired = require("../../middleware/loginRequired");
 const upload = require("../../middleware/multer");
 
+// 제품 리스트
 router.get("/products", paginate.middleware(3, 50), ctrl.get_products);
 router.get("/products/write", csrfProtection, ctrl.get_write);
 router.post(
@@ -35,5 +36,9 @@ router.post(
   upload.single("thumbnail"),
   ctrl.post_products_delete
 );
+
+// 주문 리스트
+router.get("/order", ctrl.get_order);
+router.get("/order/edit/:id", ctrl.get_order_edit);
 
 module.exports = router;
