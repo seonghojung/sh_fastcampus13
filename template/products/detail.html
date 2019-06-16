@@ -129,6 +129,11 @@ $("#cartForm").submit(function(){
       cartList = JSON.parse(getCookie('cartList'));
     }
 
+    if(cartList[productId]){
+      number = (parseInt(number, 10) + parseInt(cartList[productId].number, 10)).toString();
+      amount = (parseInt(cartList[productId].amount, 10) / parseInt(cartList[productId].number, 10) * number).toString();
+    }
+    
     cartList[productId] = {
       number: number,
       amount: amount,

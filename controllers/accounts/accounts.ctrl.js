@@ -4,14 +4,12 @@ const models = require("../../models");
 const passwordHash = require("../../helpers/passwordHash");
 
 passport.serializeUser((user, done) => {
-  console.log("serializeUser");
   done(null, user);
 });
 
 passport.deserializeUser((user, done) => {
   const result = user;
   result.password = "";
-  console.log("deserializeUser");
   done(null, result);
 });
 
@@ -75,12 +73,108 @@ exports.post_join = async (req, res) => {
 exports.get_login = (req, res) => {
   res.render("accounts/login.html", { flashMessage: req.flash().error });
 };
-exports.post_login = async (_, res) => {
-  res.send('<script>alert("로그인 성공");location.href="/";</script>');
+exports.post_login = async (req, res) => {
+  try {
+    let cartList = {}; // 장바구니 리스트
+    if (typeof req.cookies.cartList !== "undefined") {
+      // 장바구니데이터
+      cartList = JSON.parse(req.cookies.cartList);
+      const cart = await models.Cart.findAll({
+        where: {
+          user_id: req.user.id
+        }
+      });
+      for (let i = 0; i < cart.length; i += 1) {
+        if (cartList[cart[i].product_id]) {
+          if (parseInt(cart[i].number, 10) !== parseInt(cartList[cart[i].product_id].number, 10)) {
+            cart[i].number = (
+              parseInt(cart[i].number, 10) + parseInt(cartList[cart[i].product_id].number, 10)
+            ).toString();
+            cart[i].amount = (
+              (parseInt(cartList[cart[i].product_id].amount, 10)
+                / parseInt(cartList[cart[i].product_id].number, 10))
+              * parseInt(cart[i].number, 10)
+            ).toString();
+          }
+        }
+
+        cartList[cart[i].product_id] = {
+          number: cart[i].number,
+          amount: cart[i].amount,
+          thumbnail: cart[i].thumbnail,
+          name: cart[i].name
+        };
+      }
+      res.clearCookie("cartList");
+      res.cookie("cartList", JSON.stringify(cartList), {
+        maxAge: 3600 * 1000 * 3
+      });
+
+      await models.Cart.destroy({
+        where: {
+          user_id: req.user.id
+        }
+      });
+
+      const user = await models.User.findByPk(req.user.id);
+      for (const key in cartList) {
+        await user.createCart({
+          product_id: key,
+          number: cartList[key].number,
+          amount: cartList[key].amount,
+          thumbnail: cartList[key].thumbnail,
+          name: cartList[key].name
+        });
+      }
+    } else {
+      const cart = await models.Cart.findAll({
+        where: {
+          user_id: req.user.id
+        }
+      });
+      for (let i = 0; i < cart.length; i += 1) {
+        cartList[cart[i].product_id] = {
+          number: cart[i].number,
+          amount: cart[i].amount,
+          thumbnail: cart[i].thumbnail,
+          name: cart[i].name
+        };
+      }
+      res.cookie("cartList", JSON.stringify(cartList), {
+        maxAge: 3600 * 1000 * 3
+      });
+    }
+    res.send('<script>alert("로그인 성공");location.href="/";</script>');
+  } catch (e) {
+    console.log(e);
+  }
 };
 
 // 로그아웃 페이지
-exports.get_logout = (req, res) => {
+exports.get_logout = async (req, res) => {
+  let cartList = {}; // 장바구니 리스트
+  if (typeof req.cookies.cartList !== "undefined") {
+    // 장바구니데이터
+    cartList = JSON.parse(req.cookies.cartList);
+
+    await models.Cart.destroy({
+      where: {
+        user_id: req.user.id
+      }
+    });
+
+    const user = await models.User.findByPk(req.user.id);
+    for (const key in cartList) {
+      await user.createCart({
+        product_id: key,
+        number: cartList[key].number,
+        amount: cartList[key].amount,
+        thumbnail: cartList[key].thumbnail,
+        name: cartList[key].name
+      });
+    }
+  }
+  res.clearCookie("cartList");
   req.logout();
   res.redirect("/accounts/login");
 };

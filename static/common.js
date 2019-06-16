@@ -1,7 +1,8 @@
 function getCookie(cname) {
   const name = `${cname}=`;
-  const decodedCookie = decodeURIComponent(unescape(document.cookie));
+  const decodedCookie = decodeURIComponent(document.cookie);
   const ca = decodedCookie.split(";");
+
   for (let i = 0; i < ca.length; i += 1) {
     let c = ca[i];
     while (c.charAt(0) === " ") {
@@ -19,5 +20,5 @@ function setCookieHour(name, value, hours) {
   let time = now.getTime();
   time += 3600 * 1000 * hours;
   now.setTime(time);
-  document.cookie = `${name}=${escape(value)}; path=/; expires=${now.toUTCString()};`;
+  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; expires=${now.toUTCString()};`;
 }

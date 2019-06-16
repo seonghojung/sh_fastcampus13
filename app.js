@@ -30,11 +30,11 @@ class App {
     // 세션 셋팅
     this.setSession();
 
-    // 미들웨어 셋팅
-    this.setMiddleWare();
-
     // 정적 디렉토리 추가
     this.setStatic();
+
+    // 미들웨어 셋팅
+    this.setMiddleWare();
 
     // 로컬 변수
     this.setLocals();
@@ -49,7 +49,7 @@ class App {
       .authenticate()
       .then(() => {
         console.log("Connection has been established successfully.");
-        // return db.sequelize.sync()
+        // return db.sequelize.sync();
         // return db.sequelize.drop();
       })
       .then(() => {
@@ -60,6 +60,11 @@ class App {
       .catch(err => {
         console.error("Unable to connect to the database:", err);
       });
+  }
+
+  setStatic() {
+    this.app.use("/uploads", express.static("uploads"));
+    this.app.use("/static", express.static("static"));
   }
 
   setMiddleWare() {
@@ -99,11 +104,6 @@ class App {
     });
 
     this.app.use(this.app.sessionMiddleWare);
-  }
-
-  setStatic() {
-    this.app.use("/uploads", express.static("uploads"));
-    this.app.use("/static", express.static("static"));
   }
 
   setLocals() {

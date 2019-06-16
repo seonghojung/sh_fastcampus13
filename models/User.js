@@ -39,6 +39,13 @@ module.exports = function (sequelize, DataTypes) {
       sourceKey: "id",
       onDelete: "CASCADE"
     });
+
+    User.hasMany(models.Cart, {
+      as: "Cart",
+      foreignKey: "user_id",
+      sourceKey: "id",
+      onDelete: "CASCADE"
+    });
   };
 
   User.beforeCreate((user, _) => {
