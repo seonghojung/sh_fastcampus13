@@ -32,7 +32,7 @@ module.exports = function (sequelize, DataTypes) {
   );
 
   // 년-월-일
-  Checkout.prototype.dateFormat = date => moment(date).format("YYYY-MM-DD // h:mm");
+  Checkout.prototype.dateFormat = date => moment(date).format("YYYY-MM-DD // hh:mm");
 
   return Checkout;
 };

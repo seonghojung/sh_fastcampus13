@@ -112,6 +112,8 @@ class App {
 
       this.app.locals.req_path = req.path;
 
+      this.app.locals.req_user = req.user;
+
       next();
     });
   }

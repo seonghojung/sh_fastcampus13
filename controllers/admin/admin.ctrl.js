@@ -157,3 +157,8 @@ exports.get_order_edit = async (req, res) => {
     console.log(e);
   }
 };
+
+// 통계, 구글 차트
+exports.statistics = (_, res) => {
+  res.render("admin/statistics.html");
+};

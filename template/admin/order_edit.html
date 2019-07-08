@@ -34,13 +34,11 @@
           </td>
         </tr>
         <tr>
-          <th>결재상태</th>
+          <th>결제상태</th>
           <td>
             <select name="status" class="form-control" style="max-width:120px">
               <option value="">없음</option>
-              {% set
-                                    options = [ '결재완료' , '배송중' , '배송완료' , '구매완료' ]
-                                %}
+              {% set options = [ '결제완료' , '배송중' , '배송완료' , '구매완료' ] %}
               {% for option in options %}
               <option value="{{ option }}" {% if checkout.status===option %} selected {% endif %}>{{ option }}</option>
               {% endfor %}

@@ -1,3 +1,4 @@
+const { Iamporter } = require("iamporter");
 const models = require("../../models");
 
 exports.index = (req, res) => {
@@ -17,8 +18,6 @@ exports.index = (req, res) => {
 };
 
 exports.get_complete = async (req, res) => {
-  // 모듈 선언
-  const { Iamporter } = require("iamporter");
   const iamporter = new Iamporter({
     apiKey: "8649095042200344",
     secret: "wgQJtu5iaxffsQkX7z3dTvHvwlxJ6ObD42mywsRHZ6XsWhp4QsiJXZfulMesBp5FrsdXU4EUbBm8SLcJ"
@@ -26,7 +25,7 @@ exports.get_complete = async (req, res) => {
 
   try {
     const iamportData = await iamporter.findByImpUid(req.query.imp_uid);
-    await models.Checkout.Create({
+    await models.Checkout.create({
       imp_uid: iamportData.data.imp_uid,
       merchant_uid: iamportData.data.merchant_uid,
       paid_amount: iamportData.data.amount,
@@ -38,11 +37,12 @@ exports.get_complete = async (req, res) => {
       buyer_addr: iamportData.data.buyer_addr,
       buyer_postcode: iamportData.data.buyer_postcode,
 
-      status: "결재완료"
+      status: "결제완료"
     });
-
     res.redirect("/checkout/success");
-  } catch (e) {}
+  } catch (e) {
+    console.log(e);
+  }
 };
 
 exports.post_complete = async (req, res) => {
@@ -50,6 +50,23 @@ exports.post_complete = async (req, res) => {
   res.json({ message: "success" });
 };
 
-exports.get_success = (req, res) => {
+exports.get_success = (_, res) => {
   res.render("checkout/success.html");
+};
+
+exports.get_nomember = (_, res) => {
+  res.render("checkout/nomember.html");
+};
+
+exports.get_nomember_search = async (req, res) => {
+  try {
+    const checkouts = await models.Checkout.findAll({
+      where: {
+        buyer_email: req.query.buyer_email
+      }
+    });
+    res.render("checkout/search.html", { checkouts });
+  } catch (e) {
+    console.log(e);
+  }
 };
