@@ -25,11 +25,10 @@ content -%} {% include "layout/sidebar.html" %}
     var data = google.visualization.arrayToDataTable([
       //첫줄은 [ x축, y축, 상단에 나올숫자 의미 ]
       ["날짜", "결제자수", { role: "annotation" }],
-
       //그다음부터 데이터
-      ["08-10", 10, "10명"],
-      ["08-11", 20, "20명"],
-      ["08-12", 15, "15명"]
+      {% for data in barData %}
+        ["{{ data.dataValues.date }}", {{ data.dataValues.cnt }}, "{{ data.dataValues.cnt }}명"],
+      {% endfor %}
     ]);
 
     //차트 상단에 나올 제목, 차트 전체에 세로 길이등을 지정
@@ -50,8 +49,10 @@ content -%} {% include "layout/sidebar.html" %}
   function drawpie() {
     var data = google.visualization.arrayToDataTable([
       ["상태", "갯수"],
-      ["결재자", 50],
-      ["미결재자", 10]
+      //그다음부터 데이터
+      {% for data in pieData %}
+        ["{{ data.dataValues.status }}", {{ data.dataValues.cnt }}],
+      {% endfor %}
     ]);
 
     var options = {
