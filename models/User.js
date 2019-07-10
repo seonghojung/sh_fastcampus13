@@ -46,6 +46,18 @@ module.exports = function (sequelize, DataTypes) {
       sourceKey: "id",
       onDelete: "CASCADE"
     });
+
+    // 즐겨찾기 구현
+    User.belongsToMany(models.Products, {
+      through: {
+        model: "LikesProducts",
+        unique: false
+      },
+      as: "Likes",
+      foreignKey: "user_id",
+      sourceKey: "id",
+      constraints: false
+    });
   };
 
   User.beforeCreate((user, _) => {
