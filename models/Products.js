@@ -22,13 +22,25 @@ module.exports = function (sequelize, DataTypes) {
 
     Products.belongsTo(models.User, { as: "Owner", foreignKey: "user_id", targetKey: "id" });
 
-    // 즐겨찾기 구현
+    // 좋아요 구현
     Products.belongsToMany(models.User, {
       through: {
         model: "LikesProducts",
         unique: false
       },
       as: "LikeUser",
+      foreignKey: "product_id",
+      sourceKey: "id",
+      constraints: false
+    });
+
+    // 태그 구현
+    Products.belongsToMany(models.Tag, {
+      through: {
+        model: "TagProduct",
+        unique: false
+      },
+      as: "Tag",
       foreignKey: "product_id",
       sourceKey: "id",
       constraints: false

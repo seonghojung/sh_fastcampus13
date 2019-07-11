@@ -94,7 +94,12 @@ exports.get_memo_delete = async (req, res) => {
 // 제품 수정 페이지
 exports.get_products_update = async (req, res) => {
   try {
-    const product = await models.Products.findByPk(req.params.id);
+    const product = await models.Products.findOne({
+      where: { id: req.params.id },
+      include: [{ model: models.Tag, as: "Tag" }],
+      order: [["Tag", "createdAt", "desc"]]
+    });
+
     res.render("admin/form.html", { product, csrfToken: req.csrfToken() });
   } catch (e) {
     console.log(e);
@@ -187,6 +192,42 @@ exports.statistics = async (_, res) => {
     res.render("admin/statistics.html", {
       barData,
       pieData
+    });
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+// 태그 입력 및 삭제
+exports.write_tag = async (req, res) => {
+  try {
+    const tag = await models.Tag.findOrCreate({
+      where: {
+        name: req.body.name
+      }
+    });
+
+    const product = await models.Products.findByPk(req.body.product_id);
+    const status = await product.addTag(tag[0]);
+
+    res.json({
+      status,
+      tag: tag[0]
+    });
+  } catch (e) {
+    res.json(e);
+  }
+};
+
+exports.delete_tag = async (req, res) => {
+  try {
+    const product = await models.Products.findByPk(req.params.product_id);
+    const tag = await models.Tag.findByPk(req.params.tag_id);
+
+    const result = await product.removeTag(tag);
+
+    res.json({
+      result
     });
   } catch (e) {
     console.log(e);

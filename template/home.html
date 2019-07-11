@@ -1,5 +1,6 @@
 {% set title = "쇼핑몰 메인화면" %} {% extends "layout/base.html" %} {# 좋아요
-불러오기 #} {% from "macro/like.html" import like %} {% block content -%}
+불러오기 #} {% from "macro/like.html" import like %} {# 태그 불러오기 #} {% from
+"macro/tag.html" import view_tag %} {% block content -%}
 
 <div class="container" id="masonry_container">
   {% for product in products %}
@@ -15,6 +16,8 @@
         )
       </p>
     </a>
+    <!-- 태그 불러오기 -->
+    {{ view_tag(product.Tag) }}
     <span id="like_area_{{ product.id }}">
       {{ like(isLogin, product.id, userLikes) }}
     </span>

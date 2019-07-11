@@ -7,8 +7,26 @@ exports.index = async (req, res) => {
         model: models.User,
         as: "Owner",
         attributes: ["username", "displayname"]
-      }
-    ]
+      },
+      { model: models.Tag, as: "Tag" }
+    ],
+    where: {
+      ...("name" in req.query && req.query.name
+        ? {
+          // + 태그에서 가져옴 or
+          [models.Sequelize.Op.or]: [
+            models.Sequelize.where(models.Sequelize.col("Tag.name"), {
+              [models.Sequelize.Op.like]: `%${req.query.name}%`
+            }),
+            {
+              name: {
+                [models.Sequelize.Op.like]: `%${req.query.name}%`
+              }
+            }
+          ]
+        }
+        : "")
+    }
   });
 
   // 좋아요 내용을 가져온다

@@ -33,4 +33,8 @@ router.post("/order/edit/:id", ctrl.post_order_edit);
 // 통계, 구글 차트
 router.get("/statistics", ctrl.statistics);
 
+// 태그 입력 및 삭제
+router.post("/tag", ctrl.write_tag);
+router.delete("/tag/:product_id/:tag_id", ctrl.delete_tag);
+
 module.exports = router;
