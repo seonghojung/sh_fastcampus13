@@ -1,5 +1,5 @@
-{% set title = "쇼핑몰 메인화면" %} {% extends "layout/base.html" %} {% block
-content -%}
+{% set title = "쇼핑몰 메인화면" %} {% extends "layout/base.html" %} {# 좋아요
+불러오기 #} {% from "macro/like.html" import like %} {% block content -%}
 
 <div class="container" id="masonry_container">
   {% for product in products %}
@@ -15,6 +15,9 @@ content -%}
         )
       </p>
     </a>
+    <span id="like_area_{{ product.id }}">
+      {{ like(isLogin, product.id, userLikes) }}
+    </span>
   </div>
   {% endfor %}
 </div>
